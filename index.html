@@ -1,0 +1,346 @@
+<title>Domestic Content Component Trees</title>
+<style>
+:root{
+  --plane:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+  --line:#e1e0d9; --ring:rgba(11,11,11,.10); --track:#f0efec;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a;
+  --steel:#52514e; --steelbg:#f0efec;
+  --chipbg:#fcfcfb; --tabbg:#f0efec;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --plane:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+    --line:#2c2c2a; --ring:rgba(255,255,255,.10); --track:#242423;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+    --steel:#c3c2b7; --steelbg:#242423;
+    --chipbg:#1a1a19; --tabbg:#242423;
+  }
+}
+:root[data-theme="dark"]{
+  --plane:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+  --line:#2c2c2a; --ring:rgba(255,255,255,.10); --track:#242423;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+  --steel:#c3c2b7; --steelbg:#242423;
+  --chipbg:#1a1a19; --tabbg:#242423;
+}
+body{
+  background:var(--plane); color:var(--ink);
+  font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;
+  padding-inline:16px; padding-block:0;
+}
+.wrap{max-width:880px; margin:0 auto; padding-block:28px 48px;}
+header h1{font-size:22px; font-weight:700; margin:0 0 4px; text-wrap:balance;}
+header p{margin:0; color:var(--ink2); max-width:64ch;}
+header .src{font-size:12px; color:var(--muted); margin-top:6px;}
+
+.tabs{display:flex; flex-wrap:wrap; gap:6px; margin:20px 0 10px;}
+.tabs button{
+  font:600 13px/1 system-ui,-apple-system,"Segoe UI",sans-serif;
+  padding:8px 12px; border-radius:999px; border:1px solid var(--ring);
+  background:var(--tabbg); color:var(--ink2); cursor:pointer;
+}
+.tabs button[aria-pressed="true"]{background:var(--ink); color:var(--plane); border-color:var(--ink);}
+.tabs button:focus-visible,.vars button:focus-visible{outline:2px solid var(--s1); outline-offset:2px;}
+
+.vars{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 14px;}
+.vars button{
+  font:500 12px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;
+  padding:6px 10px; border-radius:8px; border:1px solid var(--line);
+  background:var(--chipbg); color:var(--ink2); cursor:pointer;
+}
+.vars button[aria-pressed="true"]{border-color:var(--s1); color:var(--ink); box-shadow:inset 0 0 0 1px var(--s1);}
+
+.card{background:var(--surface); border:1px solid var(--ring); border-radius:12px; padding:18px 18px 14px;}
+.rootrow{display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 12px; padding-bottom:10px; border-bottom:1px solid var(--line);}
+.rootrow .t{font-size:16px; font-weight:700;}
+.rootrow .v{font-size:12px; color:var(--muted);}
+.nopct{
+  display:inline-block; font-size:11px; font-weight:600; letter-spacing:.02em;
+  color:var(--ink2); background:var(--steelbg); border:1px dashed var(--muted);
+  border-radius:6px; padding:3px 8px;
+}
+
+.tree{margin:6px 0 0 6px; padding-left:14px; border-left:2px solid var(--line);}
+.branch{position:relative; padding:12px 0 4px 16px;}
+.branch::before{content:""; position:absolute; left:-14px; top:24px; width:22px; height:2px; background:var(--line);}
+.bhead{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:2px;}
+.bhead .bt{font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em;}
+.badge{font-size:11px; font-weight:600; border-radius:999px; padding:2px 9px;}
+.badge.abs{background:var(--steelbg); color:var(--steel); border:1px solid var(--ring);}
+.badge.pct{background:var(--track); color:var(--ink2); border:1px solid var(--ring);}
+.bnote{font-size:12px; color:var(--muted); margin:0 0 6px; max-width:62ch;}
+
+.limb{margin:4px 0 4px 8px; padding-left:16px; border-left:2px solid var(--line);}
+.mp{position:relative; padding:8px 0 2px 14px;}
+.mp::before{content:""; position:absolute; left:-16px; top:18px; width:22px; height:2px; background:var(--line);}
+.mphead{display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;}
+.dot{width:10px; height:10px; border-radius:3px; flex:none; align-self:center;}
+.mphead .mn{font-weight:650;}
+.mphead .sub{margin-left:auto; font-size:12px; color:var(--ink2); font-variant-numeric:tabular-nums; white-space:nowrap;}
+
+.leaves{margin:2px 0 2px 4px; padding-left:14px; border-left:2px dotted var(--line); list-style:none;}
+.leaf{position:relative; display:flex; align-items:center; gap:10px; padding:3px 0 3px 10px; min-height:22px;}
+.leaf::before{content:""; position:absolute; left:-14px; top:50%; width:16px; height:0; border-top:2px dotted var(--line);}
+.leaf .ln{flex:1 1 140px; min-width:0; overflow-wrap:anywhere;}
+.leaf .ln small{color:var(--muted);}
+.bartrack{flex:0 1 220px; min-width:60px; height:8px; border-radius:4px; background:var(--track); overflow:hidden;}
+.bar{height:100%; border-radius:4px;}
+.leaf .lv{flex:none; width:52px; text-align:right; font-variant-numeric:tabular-nums; font-weight:600; font-size:13px;}
+.leaf.steel .ln{color:var(--ink2);}
+.leaf .si{flex:none; font-size:11px; font-weight:600; color:var(--steel); background:var(--steelbg);
+  border:1px solid var(--ring); border-radius:999px; padding:1px 8px; white-space:nowrap;}
+.leaf.plain .ln{color:var(--ink2);}
+.leaf:hover{background:color-mix(in srgb, var(--track) 55%, transparent); border-radius:6px;}
+
+.total{display:flex; align-items:center; gap:10px; margin:12px 0 2px 6px; padding:8px 10px 8px 16px;
+  border-top:1px solid var(--line); font-weight:700;}
+.total .tv{margin-left:auto; font-variant-numeric:tabular-nums; font-size:15px;}
+.total small{font-weight:500; color:var(--muted);}
+
+.notes{margin-top:18px; font-size:12px; color:var(--muted); max-width:76ch;}
+.notes p{margin:0 0 6px;}
+@media (max-width:520px){
+  .bartrack{flex-basis:110px;}
+  .leaf .lv{width:46px; font-size:12px;}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>IRS Domestic Content Safe Harbor &mdash; Component Trees</h1>
+  <p>Every technology the IRS has classified, drawn as its two compliance branches: structural <strong>Steel/Iron</strong> items (an absolute, pass/fail test) and <strong>Manufactured Products</strong>, whose Manufactured Product Components carry the assigned cost percentages summed against the adjusted-percentage threshold.</p>
+  <div class="src">Sources: Notice 2025-08 (current cost percentages), Notice 2023-38 Table 2 &amp; Notice 2024-41 (classifications). Compiled Sept 28, 2026.</div>
+</header>
+
+<div class="tabs" id="tabs" role="tablist" aria-label="Technology"></div>
+<div class="vars" id="vars" aria-label="Project variant"></div>
+
+<div class="card">
+  <div class="rootrow" id="rootrow"></div>
+  <div class="tree" id="tree"></div>
+  <div id="totalrow"></div>
+</div>
+
+<div class="notes">
+  <p><strong>&dagger; Production</strong> is the cost of manufacturing the parent product itself; it counts only if <em>every</em> listed MPC of that product is domestically produced (Notice 2023-38 &sect;3.03(2)).</p>
+  <p>Under the elective safe harbor the listed items are exclusive and exhaustive: a listed item that is absent or foreign counts as zero, and unlisted items are disregarded. Solar variants labeled &ldquo;+ domestic wafers&rdquo; may be used only when the modules incorporate c-Si cells made from U.S.-manufactured wafers.</p>
+  <p>Offshore wind and hydropower have classification trees only &mdash; no assigned percentages exist, so their Domestic Cost Percentage must be computed from manufacturers&rsquo; actual direct costs.</p>
+</div>
+</div>
+
+<script>
+const SI = "si";
+// vals arrays align with variants; null = not applicable in that variant.
+const DATA = [
+{id:"gm", tab:"Solar · Ground-Mount", name:"Solar PV — Ground-Mount", src:"Notice 2025-08 §5.05",
+ variants:["Tracking","Tracking + domestic wafers","Fixed","Fixed + domestic wafers"],
+ steel:[
+  {n:"Steel photovoltaic module racking", v:[null,null,1,1]},
+  {n:"Steel pile or steel ground screw", v:[1,1,1,1]},
+  {n:"Steel or iron reinforcing products in foundation", v:[1,1,1,1]}],
+ mps:[
+  {n:"PV Module", mpcs:[
+    ["Cells",38.0,51.6,53.2,66.6],["Frame/Backrail",6.0,4.7,8.5,6.1],["Front Glass",6.0,4.7,8.4,6.1],
+    ["Encapsulant",3.8,3.0,5.4,3.8],["Backsheet/Backglass",3.8,3.0,5.4,3.8],["Junction Box",1.0,0.8,1.4,1.0],
+    ["Edge Seals",0.3,0.2,0.4,0.3],["Pottants",0.3,0.2,0.4,0.3],["Bus Ribbons",1.5,1.2,2.1,1.5],
+    ["Bypass Diodes",0.4,0.3,0.6,0.4],["Production†",4.7,3.7,6.7,4.8]]},
+  {n:"Inverter", mpcs:[
+    ["Printed Circuit Board Assemblies",2.4,1.7,3.1,2.2],["Electrical Parts",0.8,0.6,1.1,0.8],
+    ["Thermal Management System",0.5,0.4,0.7,0.5],["Enclosure & Skids",0.6,0.5,0.9,0.6],
+    ["Production†",1.2,0.9,1.7,1.2]]},
+  {n:"PV Tracker", mpcs:[
+    ["Torque Tube",11.0,8.6,null,null],["Structural Fasteners",0.4,0.3,null,null],
+    ["Drive System",1.9,1.5,null,null],["Dampers",0.5,0.4,null,null],["Actuator",2.8,2.2,null,null],
+    ["Controller",0.7,0.6,null,null],["Rails",2.0,1.6,null,null],["Production†",9.4,7.3,null,null]]}]},
+
+{id:"rt", tab:"Solar · Rooftop", name:"Solar PV — Rooftop", src:"Notice 2025-08 §5.06",
+ variants:["MLPE","MLPE + domestic wafers","String","String + domestic wafers"],
+ steel:[],
+ mps:[
+  {n:"PV Module", mpcs:[
+    ["Cells",31.1,43.9,38.5,52.1],["Frame/Backrail",4.9,4.0,6.1,4.8],["Front Glass",4.9,4.0,6.1,4.7],
+    ["Encapsulant",3.1,2.5,3.9,3.0],["Backsheet/Backglass",3.1,2.5,3.9,3.0],["Junction Box",0.8,0.6,1.0,0.8],
+    ["Edge Seals",0.2,0.2,0.3,0.2],["Pottants",0.2,0.2,0.3,0.2],["Bus Ribbons",1.2,1.0,1.5,1.2],
+    ["Bypass Diodes",0.3,0.3,0.4,0.3],["Production†",5.8,4.7,7.2,5.6]]},
+  {n:"Inverter", mpcs:[
+    ["PCB Assemblies (DC-DC)",7.8,6.4,1.6,1.3],["PCB Assemblies (DC-AC)",11.8,9.5,2.4,1.9],
+    ["Thermal Management System",null,null,0.5,0.4],["Enclosure",4.3,3.5,1.3,1.0],
+    ["Production†",0.9,0.7,0.5,0.4]]},
+  {n:"Non-Steel Roof Racking", mpcs:[
+    ["Structural Fasteners",3.5,2.9,4.4,3.4],["Rails",15.0,12.2,18.7,14.6],["Production†",1.1,0.9,1.4,1.1]]}]},
+
+{id:"wind", tab:"Land-Based Wind", name:"Land-Based Wind", src:"Notice 2025-08 §6.02",
+ variants:["Land-based wind facility"],
+ steel:[{n:"Tower", v:[1]},{n:"Steel or iron reinforcing products in foundation", v:[1]}],
+ mps:[
+  {n:"Wind Turbine", mpcs:[["Blades",31.2],["Rotor Hub",9.9],["Nacelle",47.5],["Power Converter",8.9],["Production†",0.9]]},
+  {n:"Wind Tower Flanges", mpcs:[["Preform",0.8],["Production†",0.8]]}]},
+
+{id:"bess", tab:"Battery Storage", name:"Battery Energy Storage System", src:"Notice 2025-08 §7.02",
+ variants:["Grid-Scale (> 1 MWh)","Distributed (≤ 1 MWh)"],
+ steel:[{n:"Steel or iron reinforcing products in foundation", v:[1,null]}],
+ mps:[
+  {n:"Battery Pack/Module", mpcs:[["Cells",52.0,26.9],["Packaging",5.6,13.4],["Production†",8.0,2.9]]},
+  {n:"Inverter/Converter", mpcs:[
+    ["Printed Circuit Board Assemblies",1.4,5.4],["Thermal Mgmt System for Inverter",0.4,null],
+    ["Electrical Parts",0.5,null],["Enclosure & Skids",0.4,1.0],["Production†",1.9,4.3]]},
+  {n:"Battery Container/Housing", mpcs:[
+    ["Enclosure",14.8,22.8],["Battery Management System",7.4,10.1],
+    ["Thermal Mgmt System for Container",5.6,10.1],["Production†",2.0,3.1]]}]},
+
+{id:"osw", tab:"Offshore Wind", name:"Offshore Wind", src:"Notice 2023-38 Table 2 (classification only)", noPct:true,
+ variants:["Offshore wind facility"],
+ steel:[{n:"Tower", v:[1]},{n:"Jacket foundation", v:[1]}],
+ mps:[
+  {n:"Wind Turbine", mpcs:[["Nacelle"],["Blades"],["Rotor Hub"],["Power Converter"]]},
+  {n:"Wind Tower Flanges", mpcs:[]},
+  {n:"Transition Piece", mpcs:[]},
+  {n:"Monopile", mpcs:[]},
+  {n:"Inter-Array Cable", mpcs:[]},
+  {n:"Offshore Substation", mpcs:[]},
+  {n:"Export Cable", mpcs:[]}]},
+
+{id:"hydro", tab:"Hydropower", name:"Hydropower / Pumped Hydropower Storage", src:"Notice 2024-41 §3.02 (classification only)", noPct:true,
+ variants:["Hydropower or pumped storage facility"],
+ steel:[
+  {n:"Steel or iron rebar for the reservoirs (upper and/or lower)", v:[1]},
+  {n:"Steel or iron rebar, plating, and piping in water conveyance (penstock)", v:[1]},
+  {n:"Steel or iron rebar in powerhouse and foundation, spiral case, discharge ring, draft tube", v:[1]},
+  {n:"Steel or iron rebar in canals", v:[1]},
+  {n:"Powerhouse structure, gates, stoplogs, screens, embedded structure parts, foundation plates and anchors", v:[1]}],
+ mps:[
+  {n:"Turbine / Pump Runner", mpcs:[["Spiral/scroll case"],["Vanes"],["Bottom ring"],["Wicket gates"],["Runner"],["Draft tube"],["Shaft"],["Head cover"],["Bearings"],["Flow control & isolation mechanisms"]]},
+  {n:"Motor / Generator", mpcs:[["Stator"],["Rotor"],["Windings"],["Poles"],["Generator shaft"],["Thrust bearing"],["Brake ring/disc"],["Guide bearings"],["Ventilation & cooling system"],["Exciter"]]},
+  {n:"Generator Step-Up Transformer", mpcs:[["Containment/main tank"],["Cooling system"],["De-energized tap changer (DETC)"],["Load tap changer (LTC)"],["Bushings/insulators"]]}]}
+];
+
+const SLOTS = ["var(--s1)","var(--s2)","var(--s3)"];
+let techIdx = 0, varIdx = 0;
+try { const s = JSON.parse(localStorage.getItem("dcTreeSel")||"{}");
+      if (Number.isInteger(s.t) && s.t >= 0 && s.t < DATA.length) techIdx = s.t;
+      if (Number.isInteger(s.v)) varIdx = s.v; } catch(e){}
+
+const el = (tag, cls, txt) => { const d = document.createElement(tag); if (cls) d.className = cls; if (txt != null) d.textContent = txt; return d; };
+const fmt = v => v.toFixed(1) + "%";
+
+function renderTabs(){
+  const box = document.getElementById("tabs"); box.textContent = "";
+  DATA.forEach((t,i)=>{
+    const b = el("button", null, t.tab);
+    b.setAttribute("aria-pressed", i===techIdx);
+    b.onclick = ()=>{ techIdx = i; varIdx = 0; persist(); renderAll(); };
+    box.appendChild(b);
+  });
+}
+function renderVars(){
+  const t = DATA[techIdx], box = document.getElementById("vars"); box.textContent = "";
+  if (t.variants.length < 2){ box.hidden = true; return; }
+  box.hidden = false;
+  t.variants.forEach((v,i)=>{
+    const b = el("button", null, v);
+    b.setAttribute("aria-pressed", i===varIdx);
+    b.onclick = ()=>{ varIdx = i; persist(); renderAll(); };
+    box.appendChild(b);
+  });
+}
+function persist(){ try{ localStorage.setItem("dcTreeSel", JSON.stringify({t:techIdx,v:varIdx})); }catch(e){} }
+
+function renderAll(){
+  renderTabs(); renderVars();
+  const t = DATA[techIdx];
+  if (varIdx >= t.variants.length) varIdx = 0;
+
+  const root = document.getElementById("rootrow"); root.textContent = "";
+  root.appendChild(el("span","t", t.name));
+  root.appendChild(el("span","v", t.variants[varIdx] + "  ·  " + t.src));
+  if (t.noPct) root.appendChild(el("span","nopct","No assigned percentages — actual direct-cost method required"));
+
+  const tree = document.getElementById("tree"); tree.textContent = "";
+
+  // max value for bar scaling
+  let maxV = 0;
+  if (!t.noPct) t.mps.forEach(mp => mp.mpcs.forEach(r => { const v = r[1+varIdx]; if (v) maxV = Math.max(maxV, v); }));
+
+  // ---- Steel/Iron branch
+  const sb = el("div","branch");
+  const sh = el("div","bhead");
+  sh.appendChild(el("span","bt","Steel / Iron Requirement"));
+  const sbadge = el("span","badge abs","Absolute · 100% U.S. · pass/fail"); sh.appendChild(sbadge);
+  sb.appendChild(sh);
+  sb.appendChild(el("p","bnote","Structural steel and iron: every manufacturing process must occur in the U.S. These items never enter the percentage math."));
+  const slist = el("ul","leaves");
+  const steelRows = t.steel.filter(s => s.v[varIdx] != null);
+  if (steelRows.length === 0){
+    const li = el("li","leaf plain"); li.appendChild(el("span","ln","No steel/iron items listed for this project type")); slist.appendChild(li);
+  } else steelRows.forEach(s => {
+    const li = el("li","leaf steel");
+    li.appendChild(el("span","ln", s.n));
+    li.appendChild(el("span","si","Steel/Iron"));
+    slist.appendChild(li);
+  });
+  const slimb = el("div","limb"); slimb.appendChild(slist); sb.appendChild(slimb);
+  tree.appendChild(sb);
+
+  // ---- Manufactured Products branch
+  const mb = el("div","branch");
+  const mh = el("div","bhead");
+  mh.appendChild(el("span","bt","Manufactured Products"));
+  mh.appendChild(el("span","badge pct", t.noPct ? "Adjusted Percentage Rule · actual costs" : "Adjusted Percentage Rule · assigned cost %"));
+  mb.appendChild(mh);
+  mb.appendChild(el("p","bnote", t.noPct
+    ? "Classified manufactured products and their listed components. Percentage shares must come from each manufacturer's actual direct material and labor costs."
+    : "Sum the percentages of the items that are U.S.-made; the total must meet the adjusted percentage for the construction-start year."));
+
+  t.mps.forEach((mp,mi) => {
+    const rows = t.noPct ? mp.mpcs : mp.mpcs.filter(r => r[1+varIdx] != null);
+    if (!t.noPct && rows.length === 0) return;   // MP absent from this variant
+    const color = SLOTS[mi % SLOTS.length];
+    const mpEl = el("div","mp");
+    const head = el("div","mphead");
+    const dot = el("span","dot"); dot.style.background = t.noPct ? "var(--muted)" : color; head.appendChild(dot);
+    head.appendChild(el("span","mn", mp.n));
+    if (!t.noPct){
+      const sub = rows.reduce((a,r)=>a + r[1+varIdx], 0);
+      head.appendChild(el("span","sub","subtotal " + fmt(sub)));
+    }
+    mpEl.appendChild(head);
+    const ul = el("ul","leaves");
+    if (rows.length === 0){
+      const li = el("li","leaf plain");
+      li.appendChild(el("span","ln","Single manufactured product — no separately listed components"));
+      ul.appendChild(li);
+    } else rows.forEach(r => {
+      const li = el("li","leaf");
+      li.appendChild(el("span","ln", r[0]));
+      if (!t.noPct){
+        const v = r[1+varIdx];
+        const track = el("span","bartrack");
+        const bar = el("span","bar");
+        bar.style.width = Math.max(2, (v/maxV)*100) + "%";
+        bar.style.background = color;
+        track.appendChild(bar); li.appendChild(track);
+        li.appendChild(el("span","lv", fmt(v)));
+        li.title = mp.n + " › " + r[0] + ": " + fmt(v) + " of total manufactured products cost";
+      }
+      ul.appendChild(li);
+    });
+    const limb = el("div","limb"); limb.appendChild(ul); mpEl.appendChild(limb);
+    mb.appendChild(mpEl);
+  });
+  tree.appendChild(mb);
+
+  // ---- total row
+  const tot = document.getElementById("totalrow"); tot.textContent = "";
+  if (!t.noPct){
+    let sum = 0;
+    t.mps.forEach(mp => mp.mpcs.forEach(r => { const v = r[1+varIdx]; if (v) sum += v; }));
+    const row = el("div","total");
+    row.appendChild(el("span",null,"Total of assigned cost percentages"));
+    const small = el("small",null,"= the full manufactured-products pool for this project type");
+    row.appendChild(small);
+    row.appendChild(el("span","tv", fmt(sum)));
+    tot.appendChild(row);
+  }
+}
+renderAll();
+</script>
