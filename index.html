@@ -97,6 +97,17 @@ header .src{font-size:12px; color:var(--muted); margin-top:6px;}
 .total .tv{margin-left:auto; font-variant-numeric:tabular-nums; font-size:15px;}
 .total small{font-weight:500; color:var(--muted);}
 
+.hier{display:flex; flex-wrap:wrap; align-items:stretch; gap:6px; margin-top:14px; font-size:12px;}
+.hier .h{border:1px solid var(--ring); background:var(--surface); border-radius:8px; padding:5px 10px; font-weight:650; color:var(--ink); max-width:180px;}
+.hier .h small{display:block; font-weight:450; color:var(--muted); font-size:11px; line-height:1.3;}
+.hier .arrow{color:var(--muted); font-weight:700; align-self:center;}
+.hier .ghost{border-style:dashed; background:transparent;}
+.hier .ghost, .hier .ghost small{color:var(--muted);}
+.tag{font-size:10px; font-weight:700; letter-spacing:.07em; border-radius:4px; padding:2px 6px; flex:none; align-self:center;}
+.tag.mp{color:#fff;}
+.tag.root{background:var(--steelbg); color:var(--steel); border:1px solid var(--ring); text-transform:uppercase;}
+.leafcap{list-style:none; font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); padding:3px 0 1px 10px;}
+.leaf .ln .np{color:var(--muted); font-weight:400;}
 .notes{margin-top:18px; font-size:12px; color:var(--muted); max-width:76ch;}
 .notes p{margin:0 0 6px;}
 @media (max-width:520px){
@@ -110,6 +121,15 @@ header .src{font-size:12px; color:var(--muted); margin-top:6px;}
   <h1>IRS Domestic Content Safe Harbor &mdash; Component Trees</h1>
   <p>Every technology the IRS has classified, drawn as its two compliance branches: structural <strong>Steel/Iron</strong> items (an absolute, pass/fail test) and <strong>Manufactured Products</strong>, whose Manufactured Product Components carry the assigned cost percentages summed against the adjusted-percentage threshold.</p>
   <div class="src">Sources: Notice 2025-08 (current cost percentages), Notice 2023-38 Table 2 &amp; Notice 2024-41 (classifications). Compiled Sept 28, 2026.</div>
+  <div class="hier" aria-label="Component hierarchy">
+    <span class="h">Applicable Project<small>the facility itself</small></span>
+    <span class="arrow">&rarr;</span>
+    <span class="h">APC<small>Applicable Project Component: a steel/iron item or a Manufactured Product (MP)</small></span>
+    <span class="arrow">&rarr;</span>
+    <span class="h">MPC<small>Manufactured Product Component: U.S. if manufactured in the U.S.</small></span>
+    <span class="arrow">&rarr;</span>
+    <span class="h ghost">Subcomponents<small>origin disregarded &mdash; the test stops at the MPC level</small></span>
+  </div>
 </header>
 
 <div class="tabs" id="tabs" role="tablist" aria-label="Technology"></div>
@@ -125,6 +145,7 @@ header .src{font-size:12px; color:var(--muted); margin-top:6px;}
   <p><strong>&dagger; Production</strong> is the cost of manufacturing the parent product itself; it counts only if <em>every</em> listed MPC of that product is domestically produced (Notice 2023-38 &sect;3.03(2)).</p>
   <p>Under the elective safe harbor the listed items are exclusive and exhaustive: a listed item that is absent or foreign counts as zero, and unlisted items are disregarded. Solar variants labeled &ldquo;+ domestic wafers&rdquo; may be used only when the modules incorporate c-Si cells made from U.S.-manufactured wafers.</p>
   <p>Offshore wind and hydropower have classification trees only &mdash; no assigned percentages exist, so their Domestic Cost Percentage must be computed from manufacturers&rsquo; actual direct costs.</p>
+  <p><strong>The hierarchy stops at MPCs.</strong> An MPC counts as U.S.-made if it was manufactured in the United States <em>&ldquo;regardless of the origin of its subcomponents&rdquo;</em> (Notice 2023-38 &sect;3.03, adopting 49 CFR 661.5(d)). A blade molded and cured at a U.S. plant from imported fiberglass and resin is a U.S. MPC at its full percentage; an imported blade made of American materials is foreign.</p>
 </div>
 </div>
 
@@ -252,6 +273,7 @@ function renderAll(){
 
   const root = document.getElementById("rootrow"); root.textContent = "";
   root.appendChild(el("span","t", t.name));
+  root.appendChild(el("span","tag root","Applicable Project"));
   root.appendChild(el("span","v", t.variants[varIdx] + "  ·  " + t.src));
   if (t.noPct) root.appendChild(el("span","nopct","No assigned percentages — actual direct-cost method required"));
 
@@ -267,7 +289,7 @@ function renderAll(){
   sh.appendChild(el("span","bt","Steel / Iron Requirement"));
   const sbadge = el("span","badge abs","Absolute · 100% U.S. · pass/fail"); sh.appendChild(sbadge);
   sb.appendChild(sh);
-  sb.appendChild(el("p","bnote","Structural steel and iron: every manufacturing process must occur in the U.S. These items never enter the percentage math."));
+  sb.appendChild(el("p","bnote","Applicable Project Components (APCs) that are structural steel or iron: every manufacturing process must occur in the U.S. These items never enter the percentage math."));
   const slist = el("ul","leaves");
   const steelRows = t.steel.filter(s => s.v[varIdx] != null);
   if (steelRows.length === 0){
@@ -299,6 +321,10 @@ function renderAll(){
     const head = el("div","mphead");
     const dot = el("span","dot"); dot.style.background = t.noPct ? "var(--muted)" : color; head.appendChild(dot);
     head.appendChild(el("span","mn", mp.n));
+    const mptag = el("span","tag mp","MP");
+    mptag.style.background = t.noPct ? "var(--muted)" : color;
+    mptag.title = "Manufactured Product — an Applicable Project Component that is not steel/iron";
+    head.appendChild(mptag);
     if (!t.noPct){
       const sub = rows.reduce((a,r)=>a + r[1+varIdx], 0);
       head.appendChild(el("span","sub","subtotal " + fmt(sub)));
@@ -307,11 +333,18 @@ function renderAll(){
     const ul = el("ul","leaves");
     if (rows.length === 0){
       const li = el("li","leaf plain");
-      li.appendChild(el("span","ln","Single manufactured product — no separately listed components"));
+      li.appendChild(el("span","ln","Single manufactured product — no separately listed MPCs"));
       ul.appendChild(li);
-    } else rows.forEach(r => {
+    } else {
+      ul.appendChild(el("li","leafcap","MPCs — Manufactured Product Components"));
+      rows.forEach(r => {
       const li = el("li","leaf");
-      li.appendChild(el("span","ln", r[0]));
+      const ln = el("span","ln", r[0]);
+      if (r[0].startsWith("Production")){
+        const np = el("span","np"," — production cost of the MP itself, not an MPC");
+        ln.appendChild(np);
+      }
+      li.appendChild(ln);
       if (!t.noPct){
         const v = r[1+varIdx];
         const track = el("span","bartrack");
@@ -323,7 +356,8 @@ function renderAll(){
         li.title = mp.n + " › " + r[0] + ": " + fmt(v) + " of total manufactured products cost";
       }
       ul.appendChild(li);
-    });
+      });
+    }
     const limb = el("div","limb"); limb.appendChild(ul); mpEl.appendChild(limb);
     mb.appendChild(mpEl);
   });
